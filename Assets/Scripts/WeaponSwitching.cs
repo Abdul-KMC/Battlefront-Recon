@@ -4,37 +4,29 @@ using UnityEngine;
 public class WeaponSwitching : MonoBehaviour
 {
     InputAction switching;
-    public int selectWeapon = 0;
-    // Start is called before the first frame update
+    public int selectedWeapon = 0;
+
     void Start()
     {
         switching = new InputAction("Scroll", binding: "<Mouse>/scroll");
+        switching.AddBinding("<Gamepad>/Dpad");
+        switching.performed += _ => SwitchWeapon();
         switching.Enable();
+
         SelectWeapon();
     }
 
-    // Update is called once per frame
-    void Update()
+    void SwitchWeapon()
     {
-        float scrollValue = switching.ReadValue<Vector2>().y;
-        int previousSelected = selectWeapon;
-        if (scrollValue > 0)
-        {
-            selectWeapon++;
-            if (selectWeapon == 2)
-            {
-                selectWeapon = 0;
-            }
-        }
-        else if (scrollValue < 0)
-        {
-            selectWeapon--;
-            if (selectWeapon == -1)
-            {
-                selectWeapon = 2;
-            }
-        }
-        if (previousSelected != selectWeapon)
+        int previousSelected = selectedWeapon;
+        selectedWeapon += (int)switching.ReadValue<Vector2>().y;
+
+        if (selectedWeapon < 0)
+            selectedWeapon = transform.childCount - 1;
+        else if (selectedWeapon >= transform.childCount)
+            selectedWeapon = 0;
+
+        if (previousSelected != selectedWeapon)
             SelectWeapon();
     }
 
@@ -44,6 +36,6 @@ public class WeaponSwitching : MonoBehaviour
         {
             weapon.gameObject.SetActive(false);
         }
-        transform.GetChild(selectWeapon).gameObject.SetActive(true);
+        transform.GetChild(selectedWeapon).gameObject.SetActive(true);
     }
 }
